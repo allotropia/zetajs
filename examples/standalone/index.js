@@ -15,12 +15,11 @@ function demo() {
 
     // Turn off toolbars:
     const config = css.configuration.ReadWriteAccess.create(context, 'en-US')
-    const uielems = zetajs.fromAny(
-        config.getByHierarchicalName(
-            '/org.openoffice.Office.UI.WriterWindowState/UIElements/States'));
+    const uielems = config.getByHierarchicalName(
+        '/org.openoffice.Office.UI.WriterWindowState/UIElements/States');
     for (const i of uielems.getElementNames()) {
-        const uielem = zetajs.fromAny(uielems.getByName(i));
-        if (zetajs.fromAny(uielem.getByName('Visible'))) {
+        const uielem = uielems.getByName(i);
+        if (uielem.getByName('Visible')) {
             uielem.setPropertyValue('Visible', false);
         }
     }
@@ -83,7 +82,7 @@ function button(id, url) {
     const listener = zetajs.unoObject([css.frame.XStatusListener], {
         disposing: function(source) {},
         statusChanged: function(state) {
-            zetajs.mainPort.postMessage({cmd: 'state', id, state: zetajs.fromAny(state.State)});
+            zetajs.mainPort.postMessage({cmd: 'state', id, state: state.State});
         }
     });
     queryDispatch(urlObj).addStatusListener(listener, urlObj);

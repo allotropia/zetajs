@@ -17,7 +17,7 @@ Module.zetajs.then(function(zetajs) {
     table.setPropertyValue('BackTransparent', false);
     table.setPropertyValue('BackColor', 13421823);
     const rows = table.getRows();
-    const row = zetajs.fromAny(rows.getByIndex(0));
+    const row = rows.getByIndex(0);
     row.setPropertyValue('BackTransparent', false);
     row.setPropertyValue('BackColor', 6710932);
     const insertTextIntoCell = function(cellName, text, color) {

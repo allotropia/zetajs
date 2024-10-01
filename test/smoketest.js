@@ -96,7 +96,7 @@ Module.zetajs.then(function(zetajs) {
         console.assert(v.m11 === 'Ö');
         console.assert(v.m12 === 'hä');
         console.assert(v.m13.toString() === 'long');
-        console.assert(zetajs.fromAny(v.m14) === -123456);
+        console.assert(v.m14 === -123456);
         console.assert(v.m15.length === 3);
         console.assert(v.m15[0] === 'foo');
         console.assert(v.m15[1] === 'barr');
@@ -105,7 +105,7 @@ Module.zetajs.then(function(zetajs) {
         console.assert(v.m17.m === -123456);
         console.assert(v.m18.m1.m === 'foo');
         console.assert(v.m18.m2 === -123456);
-        console.assert(zetajs.fromAny(v.m18.m3) === -123456);
+        console.assert(v.m18.m3 === -123456);
         console.assert(v.m18.m4.m === 'barr');
         console.assert(zetajs.sameUnoObject(v.m19, test));
         console.assert(
@@ -144,13 +144,13 @@ Module.zetajs.then(function(zetajs) {
         console.assert(def.m11 === '\0');
         console.assert(def.m12 === '');
         console.assert(def.m13.toString() === 'void');
-        console.assert(zetajs.fromAny(def.m14) === undefined);
+        console.assert(def.m14 === undefined);
         console.assert(def.m15.length === 0);
         console.assert(def.m16 === zetajs.uno.org.libreoffice.embindtest.Enum.E_10);
         console.assert(def.m17.m === 0);
         console.assert(def.m18.m1.m === '');
         console.assert(def.m18.m2 === 0);
-        console.assert(zetajs.fromAny(def.m18.m3) === undefined);
+        console.assert(def.m18.m3 === undefined);
         console.assert(def.m18.m4.m === '');
         console.assert(def.m19 === null);
     }
@@ -158,7 +158,7 @@ Module.zetajs.then(function(zetajs) {
         const v = test.getTemplate();
         console.assert(v.m1.m === 'foo');
         console.assert(v.m2 === -123456);
-        console.assert(zetajs.fromAny(v.m3) === -123456);
+        console.assert(v.m3 === -123456);
         console.assert(v.m4.m === 'barr');
         console.assert(
             test.isTemplate(
@@ -173,35 +173,35 @@ Module.zetajs.then(function(zetajs) {
             zetajs.type.struct(zetajs.uno.org.libreoffice.embindtest.StructString)]);
         console.assert(def.m1.m === '');
         console.assert(def.m2 === 0);
-        console.assert(zetajs.fromAny(def.m3) === undefined);
+        console.assert(def.m3 === undefined);
         console.assert(def.m4.m === '');
     }
     {
         const v = test.getAnyVoid();
-        console.assert(zetajs.fromAny(v) === undefined);
+        console.assert(v === undefined);
         console.assert(test.isAnyVoid(v));
         console.assert(test.isAnyVoid(undefined));
     }
     {
         const v = test.getAnyBoolean();
-        console.assert(zetajs.fromAny(v) === true);
+        console.assert(v === true);
         console.assert(test.isAnyBoolean(v));
         console.assert(test.isAnyBoolean(true));
     }
     {
-        const v = test.getAnyByte();
+        const v = test.$precise.getAnyByte();
         console.assert(zetajs.fromAny(v) === -12);
         console.assert(test.isAnyByte(v));
         console.assert(test.isAnyByte(new zetajs.Any(zetajs.type.byte, -12)));
     }
     {
-        const v = test.getAnyShort();
+        const v = test.$precise.getAnyShort();
         console.assert(zetajs.fromAny(v) === -1234);
         console.assert(test.isAnyShort(v));
         console.assert(test.isAnyShort(new zetajs.Any(zetajs.type.short, -1234)));
     }
     {
-        const v = test.getAnyUnsignedShort();
+        const v = test.$precise.getAnyUnsignedShort();
         console.assert(zetajs.fromAny(v) === 54321);
         console.assert(test.isAnyUnsignedShort(v));
         console.assert(test.isAnyUnsignedShort(new zetajs.Any(zetajs.type.unsigned_short, 54321)));
@@ -213,56 +213,56 @@ Module.zetajs.then(function(zetajs) {
         console.assert(test.isAnyLong(-123456));
     }
     {
-        const v = test.getAnyUnsignedLong();
+        const v = test.$precise.getAnyUnsignedLong();
         console.assert(zetajs.fromAny(v) === 3456789012);
         console.assert(test.isAnyUnsignedLong(v));
         console.assert(test.isAnyUnsignedLong(3456789012));
     }
     {
         const v = test.getAnyHyper();
-        console.assert(zetajs.fromAny(v) === -123456789n);
+        console.assert(v === -123456789n);
         console.assert(test.isAnyHyper(v));
         console.assert(test.isAnyHyper(-123456789n));
     }
     {
-        const v = test.getAnyUnsignedHyper();
+        const v = test.$precise.getAnyUnsignedHyper();
         console.assert(zetajs.fromAny(v) === 9876543210n);
         console.assert(test.isAnyUnsignedHyper(v));
         console.assert(test.isAnyUnsignedHyper(
             new zetajs.Any(zetajs.type.unsigned_hyper, 9876543210n)));
     }
     {
-        const v = test.getAnyFloat();
+        const v = test.$precise.getAnyFloat();
         console.assert(zetajs.fromAny(v) === -10.25);
         console.assert(test.isAnyFloat(v));
         console.assert(test.isAnyFloat(new zetajs.Any(zetajs.type.float, -10.25)));
     }
     {
         const v = test.getAnyDouble();
-        console.assert(zetajs.fromAny(v) === 100.5);
+        console.assert(v === 100.5);
         console.assert(test.isAnyDouble(v));
         console.assert(test.isAnyDouble(100.5));
     }
     {
-        const v = test.getAnyChar();
+        const v = test.$precise.getAnyChar();
         console.assert(zetajs.fromAny(v) === 'Ö');
         console.assert(test.isAnyChar(v));
         console.assert(test.isAnyChar(new zetajs.Any(zetajs.type.char, 'Ö')));
     }
     {
         const v = test.getAnyString();
-        console.assert(zetajs.fromAny(v) === 'hä');
+        console.assert(v === 'hä');
         console.assert(test.isAnyString(v));
         console.assert(test.isAnyString('hä'));
     }
     {
         const v = test.getAnyType();
-        console.assert(zetajs.fromAny(v).toString() === 'long');
+        console.assert(v.toString() === 'long');
         console.assert(test.isAnyType(v));
         console.assert(test.isAnyType(zetajs.type.long));
     }
     {
-        const v = test.getAnySequence();
+        const v = test.$precise.getAnySequence();
         console.assert(zetajs.fromAny(v).length === 3);
         console.assert(zetajs.fromAny(v)[0] === 'foo');
         console.assert(zetajs.fromAny(v)[1] === 'barr');
@@ -284,37 +284,37 @@ Module.zetajs.then(function(zetajs) {
     }
     {
         const v = test.getAnyEnum();
-        console.assert(zetajs.fromAny(v) === zetajs.uno.org.libreoffice.embindtest.Enum.E_2);
+        console.assert(v === zetajs.uno.org.libreoffice.embindtest.Enum.E_2);
         console.assert(test.isAnyEnum(v));
         console.assert(test.isAnyEnum(zetajs.uno.org.libreoffice.embindtest.Enum.E_2));
     }
     {
         const v = test.getAnyStruct();
-        console.assert(zetajs.fromAny(v).m1 === true);
-        console.assert(zetajs.fromAny(v).m2 === -12);
-        console.assert(zetajs.fromAny(v).m3 === -1234);
-        console.assert(zetajs.fromAny(v).m4 === 54321);
-        console.assert(zetajs.fromAny(v).m5 === -123456);
-        console.assert(zetajs.fromAny(v).m6 === 3456789012);
-        console.assert(zetajs.fromAny(v).m7 === -123456789n);
-        console.assert(zetajs.fromAny(v).m8 === 9876543210n);
-        console.assert(zetajs.fromAny(v).m9 === -10.25);
-        console.assert(zetajs.fromAny(v).m10 === 100.5);
-        console.assert(zetajs.fromAny(v).m11 === 'Ö');
-        console.assert(zetajs.fromAny(v).m12 === 'hä');
-        console.assert(zetajs.fromAny(v).m13.toString() === 'long');
-        console.assert(zetajs.fromAny(zetajs.fromAny(v).m14) === -123456);
-        console.assert(zetajs.fromAny(v).m15.length === 3);
-        console.assert(zetajs.fromAny(v).m15[0] === 'foo');
-        console.assert(zetajs.fromAny(v).m15[1] === 'barr');
-        console.assert(zetajs.fromAny(v).m15[2] === 'bazzz');
-        console.assert(zetajs.fromAny(v).m16 === zetajs.uno.org.libreoffice.embindtest.Enum.E_2);
-        console.assert(zetajs.fromAny(v).m17.m === -123456);
-        console.assert(zetajs.fromAny(v).m18.m1.m === 'foo');
-        console.assert(zetajs.fromAny(v).m18.m2 === -123456);
-        console.assert(zetajs.fromAny(zetajs.fromAny(v).m18.m3) === -123456);
-        console.assert(zetajs.fromAny(v).m18.m4.m === 'barr');
-        console.assert(zetajs.sameUnoObject(zetajs.fromAny(v).m19, test));
+        console.assert(v.m1 === true);
+        console.assert(v.m2 === -12);
+        console.assert(v.m3 === -1234);
+        console.assert(v.m4 === 54321);
+        console.assert(v.m5 === -123456);
+        console.assert(v.m6 === 3456789012);
+        console.assert(v.m7 === -123456789n);
+        console.assert(v.m8 === 9876543210n);
+        console.assert(v.m9 === -10.25);
+        console.assert(v.m10 === 100.5);
+        console.assert(v.m11 === 'Ö');
+        console.assert(v.m12 === 'hä');
+        console.assert(v.m13.toString() === 'long');
+        console.assert(v.m14 === -123456);
+        console.assert(v.m15.length === 3);
+        console.assert(v.m15[0] === 'foo');
+        console.assert(v.m15[1] === 'barr');
+        console.assert(v.m15[2] === 'bazzz');
+        console.assert(v.m16 === zetajs.uno.org.libreoffice.embindtest.Enum.E_2);
+        console.assert(v.m17.m === -123456);
+        console.assert(v.m18.m1.m === 'foo');
+        console.assert(v.m18.m2 === -123456);
+        console.assert(v.m18.m3 === -123456);
+        console.assert(v.m18.m4.m === 'barr');
+        console.assert(zetajs.sameUnoObject(v.m19, test));
         console.assert(test.isAnyStruct(v));
         console.assert(test.isAnyStruct(
             new zetajs.uno.org.libreoffice.embindtest.Struct(
@@ -331,18 +331,18 @@ Module.zetajs.then(function(zetajs) {
     }
     {
         const v = test.getAnyException();
-        console.assert(zetajs.fromAny(v).Message.startsWith('error'));
-        console.assert(zetajs.fromAny(v).Context === null);
-        console.assert(zetajs.fromAny(v).m1 === -123456);
-        console.assert(zetajs.fromAny(v).m2 === 100.5);
-        console.assert(zetajs.fromAny(v).m3 === 'hä');
+        console.assert(v.Message.startsWith('error'));
+        console.assert(v.Context === null);
+        console.assert(v.m1 === -123456);
+        console.assert(v.m2 === 100.5);
+        console.assert(v.m3 === 'hä');
         console.assert(test.isAnyException(v));
         console.assert(test.isAnyException(
             new zetajs.uno.org.libreoffice.embindtest.Exception(
                 {Message: 'error', m1: -123456, m2: 100.5, m3: 'hä'})));
     }
     {
-        const v = test.getAnyInterface();
+        const v = test.$precise.getAnyInterface();
         console.assert(zetajs.sameUnoObject(zetajs.fromAny(v), test));
         console.assert(test.isAnyInterface(v));
         console.assert(test.isAnyInterface(
@@ -462,7 +462,7 @@ Module.zetajs.then(function(zetajs) {
             zetajs.type.sequence(zetajs.type.enum(zetajs.uno.org.libreoffice.embindtest.Enum))]));
     }
     {
-        const v = test.getSequenceAny();
+        const v = test.$precise.getSequenceAny();
         console.assert(v.length === 3);
         console.assert(zetajs.fromAny(v[0]) === -123456);
         console.assert(zetajs.fromAny(v[1]) === undefined);
@@ -492,7 +492,7 @@ Module.zetajs.then(function(zetajs) {
         console.assert(test.isSequenceEnum(v));
     }
     {
-        const v = test.getSequenceStruct();
+        const v = test.$precise.getSequenceStruct();
         console.assert(v.length === 3);
         console.assert(v[0].m1 === true);
         console.assert(v[0].m2 === -12);
@@ -616,7 +616,7 @@ Module.zetajs.then(function(zetajs) {
         console.assert(v11.val === 'Ö');
         console.assert(v12.val === 'hä');
         console.assert(v13.val.toString() === 'long');
-        console.assert(zetajs.fromAny(v14.val) === -123456)
+        console.assert(v14.val === -123456)
         console.assert(v15.val.length === 3);
         console.assert(v15.val[0] === 'foo');
         console.assert(v15.val[1] === 'barr');
@@ -635,7 +635,7 @@ Module.zetajs.then(function(zetajs) {
         console.assert(v17.val.m11 === 'Ö');
         console.assert(v17.val.m12 === 'hä');
         console.assert(v17.val.m13.toString() === 'long');
-        console.assert(zetajs.fromAny(v17.val.m14) === -123456);
+        console.assert(v17.val.m14 === -123456);
         console.assert(v17.val.m15.length === 3);
         console.assert(v17.val.m15[0] === 'foo');
         console.assert(v17.val.m15[1] === 'barr');
@@ -644,7 +644,7 @@ Module.zetajs.then(function(zetajs) {
         console.assert(v17.val.m17.m === -123456);
         console.assert(v17.val.m18.m1.m === 'foo');
         console.assert(v17.val.m18.m2 === -123456);
-        console.assert(zetajs.fromAny(v17.val.m18.m3) === -123456);
+        console.assert(v17.val.m18.m3 === -123456);
         console.assert(v17.val.m18.m4.m === 'barr');
         console.assert(zetajs.sameUnoObject(v17.val.m19, test));
         console.assert(zetajs.sameUnoObject(v18.val, test));
@@ -655,7 +655,7 @@ Module.zetajs.then(function(zetajs) {
     } catch (e) {
         const exc = zetajs.catchUnoException(e);
         console.assert(zetajs.getAnyType(exc) == 'com.sun.star.uno.RuntimeException');
-        console.assert(zetajs.fromAny(exc).Message.startsWith('test'));
+        console.assert(exc.Message.startsWith('test'));
     }
     try {
         zetajs.throwUnoException(
@@ -667,16 +667,12 @@ Module.zetajs.then(function(zetajs) {
     } catch (e) {
         const exc = zetajs.catchUnoException(e);
         console.assert(zetajs.getAnyType(exc) == 'com.sun.star.lang.WrappedTargetException');
-        console.assert(zetajs.fromAny(exc).Message.startsWith('wrapped'));
-        console.assert(zetajs.sameUnoObject(zetajs.fromAny(exc).Context, test));
+        console.assert(exc.Message.startsWith('wrapped'));
+        console.assert(zetajs.sameUnoObject(exc.Context, test));
         console.assert(
-            zetajs.getAnyType(zetajs.fromAny(exc).TargetException) ==
-                'com.sun.star.uno.RuntimeException');
-        console.assert(
-            zetajs.fromAny(zetajs.fromAny(exc).TargetException).Message.startsWith('test'));
-        console.assert(
-            zetajs.sameUnoObject(
-                zetajs.fromAny(zetajs.fromAny(exc).TargetException).Context, test));
+            zetajs.getAnyType(exc.TargetException) == 'com.sun.star.uno.RuntimeException');
+        console.assert(exc.TargetException.Message.startsWith('test'));
+        console.assert(zetajs.sameUnoObject(exc.TargetException.Context, test));
     }
     console.assert(test.StringAttribute === 'hä');
     test.StringAttribute = 'foo';
@@ -723,17 +719,14 @@ Module.zetajs.then(function(zetajs) {
         [css.task.XJob, css.task.XJobExecutor, zetajs.uno.org.libreoffice.embindtest.XAttributes],
         objImpl);
     console.assert(
-        zetajs.fromAny(
-            obj.queryInterface(zetajs.type.interface(zetajs.uno.org.libreoffice.embindtest.XTest)))
+        obj.queryInterface(zetajs.type.interface(zetajs.uno.org.libreoffice.embindtest.XTest))
             === undefined);
     console.assert(
-        zetajs.sameUnoObject(
-            zetajs.fromAny(obj.queryInterface(zetajs.type.interface(css.uno.XInterface))), obj));
+        zetajs.sameUnoObject(obj.queryInterface(zetajs.type.interface(css.uno.XInterface)), obj));
     console.assert(
         zetajs.sameUnoObject(
-            zetajs.fromAny(
-                obj.queryInterface(
-                    zetajs.type.interface(zetajs.uno.org.libreoffice.embindtest.XAttributes))),
+            obj.queryInterface(
+                zetajs.type.interface(zetajs.uno.org.libreoffice.embindtest.XAttributes)),
             obj));
     test.passJob(obj);
     test.passJobExecutor(obj, false);

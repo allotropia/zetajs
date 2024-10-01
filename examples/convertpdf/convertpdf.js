@@ -23,8 +23,7 @@ Module.zetajs.then(function(argZetajs) {
             try {
                 // Close old doc in advance. Keep doc open afterwards for debugging.
                 if (doc !== undefined &&
-                    zetajs.fromAny(doc.queryInterface(zetajs.type.interface(css.util.XCloseable)))
-                        !== undefined) {
+                    doc.queryInterface(zetajs.type.interface(css.util.XCloseable))) {
                     doc.close(false);
                 }
                 from = e.data.from;
@@ -34,7 +33,7 @@ Module.zetajs.then(function(argZetajs) {
                 zetajs.mainPort.postMessage({cmd: 'converted', name: e.data.name, from, to});
             } catch (e) {
                 const exc = zetajs.catchUnoException(e);
-                console.log('TODO', zetajs.getAnyType(exc), zetajs.fromAny(exc).Message);
+                console.log('TODO', zetajs.getAnyType(exc), exc.Message);
             }
             break;
         default:

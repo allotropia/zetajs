@@ -11,6 +11,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
             value.forEach((val) => val.delete());
         });
         const getProxyTarget = Symbol('getProxyTarget');
+        const keepAlive = Symbol('keepAlive');
         function gcWrap(obj) {
             // Embind has already registered obj at some FinalizationRegistry that prints the
             // "Embind found a leaked C++ instance" warning, which we want to suppress; and if we
@@ -222,7 +223,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 type.delete();
             }
         };
-        function translateFromEmbind(val, type, cleanUpVal) {
+        function translateFromEmbind(val, type, precise, cleanUpVal) {
             switch (type.getTypeClass()) {
             case Module.uno.com.sun.star.uno.TypeClass.BOOLEAN:
                 return Boolean(val);
@@ -231,20 +232,22 @@ Module.zetajs = new Promise(function (resolve, reject) {
             case Module.uno.com.sun.star.uno.TypeClass.ANY:
                 {
                     const ty = gcWrap(val.getType());
+                    let v;
                     try {
-                        return new Any(ty, translateFromEmbind(val.get(), ty, cleanUpVal));
+                        v = translateFromEmbind(val.get(), ty, precise, cleanUpVal);
                     } finally {
                         if (cleanUpVal) {
                             val.delete();
                         }
                     }
+                    return precise ? new Any(ty, v) : v;
                 }
             case Module.uno.com.sun.star.uno.TypeClass.SEQUENCE:
                 {
                     const td = type.getSequenceComponentType();
                     const arr = [];
                     for (let i = 0; i !== val.size(); ++i) {
-                        arr.push(translateFromEmbind(val.get(i), td, cleanUpVal));
+                        arr.push(translateFromEmbind(val.get(i), td, precise, cleanUpVal));
                     }
                     if (cleanUpVal) {
                         val.delete();
@@ -277,7 +280,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                         for (let i = 0; i !== types.size(); ++i) {
                             const name = names.get(i);
                             const td = translateTypeDescriptionAndDelete(types.get(i));
-                            obj[name] = translateFromEmbind(val[name], td, cleanUpVal);
+                            obj[name] = translateFromEmbind(val[name], td, precise, cleanUpVal);
                             td.delete();
                         }
                         types.delete();
@@ -301,18 +304,18 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 return val;
             }
         };
-        function translateFromAny(any, type) {
+        function translateFromAny(any, type, precise) {
             if (type.getTypeClass() === Module.uno.com.sun.star.uno.TypeClass.ANY) {
-                return translateFromEmbind(any, type, false);
+                return translateFromEmbind(any, type, precise, false);
             } else {
                 const td = any.getType();
-                const val = translateFromEmbind(any.get(), td, true);
+                const val = translateFromEmbind(any.get(), td, precise, true);
                 td.delete();
                 return val;
             }
         };
-        function translateFromAnyAndDelete(any, type) {
-            const val = translateFromAny(any, type);
+        function translateFromAnyAndDelete(any, type, precise) {
+            const val = translateFromAny(any, type, precise);
             any.delete();
             return val;
         };
@@ -324,6 +327,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
             const toDelete = [unoObject];
             Module.uno$zetajs_deleteRegistry.register(prox, toDelete);
             prox[getProxyTarget] = unoObject;
+            prox.$precise = {[getProxyTarget]: unoObject, [keepAlive]: prox};
             // css.script.XInvocation2::getInfo invents additional members (e.g., an attribute "Foo"
             // if there is a method "getFoo"), so better determine the actual set of members via
             // css.lang.XTypeProvider::getTypes:
@@ -343,7 +347,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 const invoke = Module.uno.com.sun.star.script.XInvocation2.query(inst);
                 inst.delete();
                 toDelete.push(invoke);
-                function invokeMethod(name, args) {
+                function invokeMethod(name, args, precise) {
                     const info = invoke.getInfoForName(name, true);
                     try {
                         if (args.length != info.aParamTypes.size()) {
@@ -390,9 +394,9 @@ Module.zetajs = new Promise(function (resolve, reject) {
                             if (getAnyType(exc) ==
                                 'com.sun.star.reflection.InvocationTargetException')
                             {
-                                throwUnoException(fromAny(fromAny(exc).TargetException));
+                                throwUnoException(exc.TargetException);
                             } else {
-                                throwUnoException(fromAny(exc));
+                                throwUnoException(exc);
                             }
                         } finally {
                             deleteArgs.forEach((arg) => arg.delete());
@@ -405,23 +409,23 @@ Module.zetajs = new Promise(function (resolve, reject) {
                         for (let i = 0; i !== outparamindex.size(); ++i) {
                             const j = outparamindex.get(i);
                             const ty = info.aParamTypes.get(j);
-                            args[j].val = translateFromAnyAndDelete(outparam.get(i), ty);
+                            args[j].val = translateFromAnyAndDelete(outparam.get(i), ty, precise);
                             ty.delete();
                         }
                         outparamindex.delete();
                         outparam.delete();
-                        return translateFromAnyAndDelete(ret, info.aType);
+                        return translateFromAnyAndDelete(ret, info.aType, precise);
                     } finally {
                         info.aType.delete();
                         info.aParamTypes.delete();
                         info.aParamModes.delete();
                     }
                 };
-                function invokeGetter(name) {
+                function invokeGetter(name, precise) {
                     const info = invoke.getInfoForName(name, true);
                     try {
                         const ret = invoke.getValue(name);
-                        return translateFromAnyAndDelete(ret, info.aType);
+                        return translateFromAnyAndDelete(ret, info.aType, precise);
                     } finally {
                         info.aType.delete();
                         info.aParamTypes.delete();
@@ -444,7 +448,9 @@ Module.zetajs = new Promise(function (resolve, reject) {
                     }
                 };
                 prox.queryInterface = function() {
-                    return invokeMethod('queryInterface', arguments); };
+                    return invokeMethod('queryInterface', arguments, false); };
+                prox.$precise.queryInterface = function() {
+                    return invokeMethod('queryInterface', arguments, true); };
                 const seen = {'com.sun.star.uno.XInterface': true};
                 function walk(td) {
                     const iname = td.getName();
@@ -472,13 +478,24 @@ Module.zetajs = new Promise(function (resolve, reject) {
                             if (atd !== null) {
                                 Object.defineProperty(prox, name, {
                                     enumerable: true,
-                                    get() { return invokeGetter(name); },
+                                    get() { return invokeGetter(name, false); },
+                                    set: atd.isReadOnly()
+                                        ? undefined
+                                        : function(value) { return invokeSetter(name, value); }});
+                                Object.defineProperty(prox.$precise, name, {
+                                    enumerable: true,
+                                    get() { return invokeGetter(name, true); },
                                     set: atd.isReadOnly()
                                         ? undefined
                                         : function(value) { return invokeSetter(name, value); }});
                                 atd.delete();
                             } else {
-                                prox[name] = function() { return invokeMethod(name, arguments); };
+                                prox[name] = function() {
+                                    return invokeMethod(name, arguments, false);
+                                };
+                                prox.$precise[name] = function() {
+                                    return invokeMethod(name, arguments, true);
+                                };
                             }
                         }
                         itd.delete();
@@ -487,6 +504,11 @@ Module.zetajs = new Promise(function (resolve, reject) {
                             prox[Symbol.iterator] = function*() {
                                 while (prox.hasMoreElements()) {
                                     yield prox.nextElement();
+                                }
+                            }
+                            prox.$precise[Symbol.iterator] = function*() {
+                                while (prox.$precise.hasMoreElements()) {
+                                    yield prox.$precise.nextElement();
                                 }
                             }
                         }
@@ -516,7 +538,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 const any = context.getValueByName('/singletons/' + name);
                 if (getAnyType(any).getTypeClass() !==
                         Module.uno.com.sun.star.uno.TypeClass.INTERFACE
-                    || fromAny(any) === null)
+                    || any === null)
                 {
                     throwUnoException(
                         new uno.com.sun.star.uno.DeploymentException(
@@ -994,7 +1016,8 @@ Module.zetajs = new Promise(function (resolve, reject) {
                                 if (!atd.isReadOnly()) {
                                     wrapper['set' + aname] = function() {
                                         obj['set' + aname].apply(
-                                            obj, [translateFromEmbind(arguments[0], type, false)]);
+                                            obj,
+                                            [translateFromEmbind(arguments[0], type, true, false)]);
                                     };
                                 }
                                 atd.delete();
@@ -1026,11 +1049,11 @@ Module.zetajs = new Promise(function (resolve, reject) {
                                             arg = {};
                                             if (params[i].dirIn) {
                                                 arg.val = translateFromEmbind(
-                                                    arguments[i].val, params[i].type, false);
+                                                    arguments[i].val, params[i].type, true, false);
                                             }
                                         } else {
                                             arg = translateFromEmbind(
-                                                arguments[i], params[i].type, false);
+                                                arguments[i], params[i].type, true, false);
                                         }
                                         args.push(arg);
                                     }
