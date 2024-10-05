@@ -90,6 +90,8 @@ function demo() {
             throw Error('Unknonwn message command ' + e.data.cmd);
         }
     }
+
+    zetajs.mainPort.postMessage({cmd: 'ready'});
 }
 
 function findEmptyRowInCol1(activeSheet) {
@@ -130,11 +132,16 @@ function dispatch(url) {
     queryDispatch(urlObj).dispatch(urlObj, []);
 }
 
-Module.zetajs.then(function(pZetajs) {
-    // initializing zetajs environment
-    zetajs = pZetajs;
-    css = zetajs.uno.com.sun.star;
-    demo();  // launching demo
-});
+const interval = setInterval(function() {
+    // sometimes Module.zetajs isn't immediately available in Firefox~128
+    if (typeof Module.zetajs === 'undefined') return;
+    clearInterval(interval);
+    Module.zetajs.then(function(pZetajs) {
+        // initializing zetajs environment
+        zetajs = pZetajs;
+        css = zetajs.uno.com.sun.star;
+        demo();  // launching demo
+    });
+}, 100);  // milliseconds
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

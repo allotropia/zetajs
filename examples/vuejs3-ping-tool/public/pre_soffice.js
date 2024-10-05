@@ -13,7 +13,12 @@ let thrPort;     // zetajs thread communication
 let tbDataJs;    // toolbar dataset passed from vue.js for plain JS
 let PingModule;  // Ping module passed from vue.js for plain JS
 
+const loadingInfo = document.getElementById('loadingInfo');
 const canvas = document.getElementById('qtcanvas');
+const pingSection = document.getElementById("ping_section");
+const pingTarget = document.getElementById("ping_target");
+
+
 // Debugging note:
 // Switch the web worker in the browsers debug tab to debug code inside uno_scripts.
 var Module = {
@@ -26,10 +31,6 @@ if (soffice_base_url !== '') {
   Module.mainScriptUrlOrBlob = new Blob(
     ["importScripts('"+soffice_base_url+"soffice.js');"], {type: 'text/javascript'});
 }
-
-
-const pingSection = document.getElementById("ping_section");
-const pingTarget = document.getElementById("ping_target");
 
 
 function jsPassCtrlBar(pTbDataJs) {
@@ -84,8 +85,9 @@ function pingExamples(err, data) {
 
 function btnPing() {
   // Using Ping callback interface.
-  // 'Cross-Origin-Embedder-Policy': Does NOT work with 'require-corp'.
-  //   But you may use 'credentialless'
+  // 'Cross-Origin-Embedder-Policy': Ping seems to work with 'require-corp' without
+  //   acutally having CORP on foreign origins.
+  //   Also 'credentialless' isn't supported by Safari-18 as of 2024-09.
   const url = pingTarget.value;
   pingInst.ping(url, function(err, data) {
     pingResult(url, err, data);
@@ -136,21 +138,31 @@ soffice_js.onload = function() {
     window.dispatchEvent(new Event('resize'));
 
     pingInst = new PingModule();
-    setTimeout(function() {
-      // Trigger resize of the embedded window to match the canvas size.
-      // May somewhen be obsoleted by:
-      //   https://gerrit.libreoffice.org/c/core/+/174040
-      window.dispatchEvent(new Event('resize'));
-      // Using Ping callback interface.
-      // 'Cross-Origin-Embedder-Policy': Does NOT work with 'require-corp'.
-      //   But you may use 'credentialless'
-      pingInst.ping(urls_ary[urls_ary_i], function() {
-        // Continue after first ping, which is often exceptionally slow.
-        pingInst.ping(urls_ary[urls_ary_i], function(err, data) {
-          pingExamples(err, data);
-        });
-      });
-    }, 10000);  // milliseconds
+    pThrPort.onmessage = function(e) {
+        switch (e.data.cmd) {
+        case 'ready':
+            loadingInfo.style.display = 'none';
+            setTimeout(function() {
+                // Trigger resize of the embedded window to match the canvas size.
+                // May somewhen be obsoleted by:
+                //   https://gerrit.libreoffice.org/c/core/+/174040
+                window.dispatchEvent(new Event('resize'));
+                // Using Ping callback interface.
+                // 'Cross-Origin-Embedder-Policy': Ping seems to work with 'require-corp' without
+                //   acutally having CORP on foreign origins.
+                //   Also 'credentialless' isn't supported by Safari-18 as of 2024-09.
+                pingInst.ping(urls_ary[urls_ary_i], function() {
+                  // Continue after first ping, which is often exceptionally slow.
+                  pingInst.ping(urls_ary[urls_ary_i], function(err, data) {
+                    pingExamples(err, data);
+                  });
+                });
+            }, 2000);  // milliseconds
+            break;
+        default:
+            throw Error('Unknonwn message command ' + e.data.cmd);
+        }
+    };
   });
 };
 // Hint: The global objects "canvas" and "Module" must exist before the next line.

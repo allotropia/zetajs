@@ -8,6 +8,18 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+        .spinner {
+          border: 16px solid #1F2937; /* ZetaOffice brand color */
+          border-top: 16px solid #059669; /* ZetaOffice brand color */
+          border-radius: 50%;
+          width: 120px;
+          height: 120px;
+          animation: spin 2s linear 30; /* 60 seconds */
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
     </style>
   </head>
   <body>
@@ -17,6 +29,10 @@
         <input type="text" id="ping_target" name="ping_target" value="https://zetaoffice.org/">
     </div><br>
     <div>
+      <div id="loadingInfo">
+        <div class="spinner"></div><br>
+        <h2>ZetaOffice is loading...</h2>
+      </div>
       <canvas id="qtcanvas" width="1150px" height="500px" class="disable-mouse-input"/>
       <!--
         In this demo the canvas content isn't editable.
@@ -33,9 +49,13 @@
         // Use an empty string if those files are in the same directory.
         const soffice_base_url = '';
 
+        const loadingInfo = document.getElementById('loadingInfo');
+        const canvas = document.getElementById('qtcanvas');
+        const pingTarget = document.getElementById("ping_target");
+
 
         var Module = {
-            canvas: document.getElementById('qtcanvas'),
+            canvas,
             uno_scripts: ['./zeta.js', './office_thread.js'],
             locateFile: function(path, prefix) { return (prefix || soffice_base_url) + path; },
         };
@@ -46,7 +66,6 @@
         }
 
         let thrPort;     // zetajs thread communication
-        const pingTarget = document.getElementById("ping_target");
         const pingInst = new Ping();
         let url = pingTarget.value;
 
@@ -92,19 +111,29 @@
                 //window.dispatchEvent(new Event('resize'));  // TODO: see topwin.setPosSize workaround
                 // May somewhen be obsoleted by:
                 //   https://gerrit.libreoffice.org/c/core/+/174040
-            
-                setTimeout(function() {
-                    //window.dispatchEvent(new Event('resize'));  // TODO: see topwin.setPosSize workaround
-                    // Using Ping callback interface.
-                    // 'Cross-Origin-Embedder-Policy': Does NOT work with 'require-corp'.
-                    //   But you may use 'credentialless'
-                    pingInst.ping(pingTarget, function() {
-                        // Continue after first ping, which is often exceptionally slow.
-                        setInterval(function() {
-                            doPing();
-                        }, 1000);  // milliseconds
-                    });
-                }, 10000);  // milliseconds
+
+                pThrPort.onmessage = function(e) {
+                    switch (e.data.cmd) {
+                    case 'ready':
+                        loadingInfo.style.display = 'none';
+                        setTimeout(function() {
+                            //window.dispatchEvent(new Event('resize'));  // TODO: see topwin.setPosSize workaround
+                            // Using Ping callback interface.
+                            // 'Cross-Origin-Embedder-Policy': Ping seems to work with 'require-corp' without
+                            //   acutally having CORP on foreign origins.
+                            //   Also 'credentialless' isn't supported by Safari-18 as of 2024-09.
+                            pingInst.ping(pingTarget, function() {
+                                // Continue after first ping, which is often exceptionally slow.
+                                setInterval(function() {
+                                    doPing();
+                                }, 1000);  // milliseconds
+                            });
+                        }, 2000);  // milliseconds
+                        break;
+                    default:
+                        throw Error('Unknonwn message command ' + e.data.cmd);
+                    }
+                }
             });
         };
         // Hint: The global objects "canvas" and "Module" must exist before the next line.

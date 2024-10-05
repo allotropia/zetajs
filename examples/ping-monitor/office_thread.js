@@ -42,6 +42,9 @@ function demo() {
     topwin = css.awt.Toolkit.create(context).getActiveTopWindow();
     topwin.FullScreen = true;
     topwin.setMenuBar(null);
+
+    // Workaround to hide scrollbars and sheet tabs:
+    // Move them behind the lower and right edges of the canvas.
     topwin.setPosSize(0, 0, 1300+12, 600+40, 15);
     //topwin.setPosSize(-40, 0, 1300+52, 600+40, 15);  // with "Formula Bar" and "RowColumnHeaders"
 
@@ -55,6 +58,7 @@ function demo() {
     cellRange = activeSheet.getCellRangeByPosition(0, 1, 0, max_values+1);
     dataAry = cellRange.getDataArray();  // 2 dimensional array
     zetajs.mainPort.onmessage = function (e) {
+        topwin.setPosSize(0, 0, 1300+12, 600+40, 15);
         //topwin.setPosSize(-40, 0, 1300+52, 600+40, 15);  // with "Formula Bar" and "RowColumnHeaders"
         switch (e.data.cmd) {
         case 'ping_result':
@@ -72,6 +76,8 @@ function demo() {
             throw Error('Unknonwn message command ' + e.data.cmd);
         }
     }
+
+    zetajs.mainPort.postMessage({cmd: 'ready'});
 }
 
 function moveRows(ary) {

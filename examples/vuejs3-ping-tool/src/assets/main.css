@@ -37,3 +37,14 @@ a,
     padding: 0.3rem 0.6rem;  /* border: top left */
   }
 }
+
+/* Disable dark mode. ControlBar doesn't work well with it. */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

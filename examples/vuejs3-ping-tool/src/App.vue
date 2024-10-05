@@ -29,6 +29,10 @@
       </tr>
       <tr>
         <td>
+          <div id="loadingInfo">
+            <div class="spinner"></div><br>
+            <h2>ZetaOffice is loading...</h2>
+          </div>
           <canvas
             id="qtcanvas" contenteditable="true"
             oncontextmenu="event.preventDefault()" onkeydown="event.preventDefault()"
@@ -47,3 +51,19 @@
     </table>
   </div>
 </template>
+
+
+<style>
+  .spinner {
+    border: 16px solid #1F2937; /* ZetaOffice brand color */
+    border-top: 16px solid #059669; /* ZetaOffice brand color */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear 30; /* 60 seconds */
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
