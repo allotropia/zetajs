@@ -8,8 +8,10 @@
     <input type="file" id="input" disabled/>
     <label><input type=checkbox id="download"/> Download</label>
     <iframe id="frame"></iframe>
+    <canvas id="qtcanvas" style="display: none"/>
     <script type="text/javascript">
-      var Module = {uno_scripts: ['./zeta.js', './convertpdf.js']};
+      const canvas = document.getElementById('qtcanvas');
+      var Module = {canvas, uno_scripts: ['./zeta.js', './convertpdf.js']};
     </script>
     <script src="soffice.js" type="text/javascript"></script>
     <script type="text/javascript">
@@ -37,7 +39,7 @@
           port.onmessage = function(e) {
               switch (e.data.cmd) {
               case 'converted':
-                  FS.unlink(e.data.from);
+                  try { FS.unlink(e.data.from); } catch {}  // for easier debugging
                   const data = FS.readFile(e.data.to);
                   const blob = new Blob([data], {type: 'application/pdf'});
                   const url = URL.createObjectURL(blob);
@@ -51,7 +53,7 @@
                       link.click();
                       document.body.removeChild(link);
                   }
-                  FS.unlink(e.data.to);
+                  try { FS.unlink(e.data.to); } catch {}  // for easier debugging
                   URL.revokeObjectURL(url);
                   // fallthrough
               case 'start':
