@@ -9,7 +9,7 @@ source := \
     $(LOWAINSTDIR)soffice.worker.js \
     ../../source/zeta.js \
     convertpdf.js \
-    convertpdf.html
+    index.html
 
 define target
 all: out/$(notdir $(1))
