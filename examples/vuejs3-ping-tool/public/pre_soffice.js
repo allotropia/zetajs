@@ -163,6 +163,12 @@ soffice_js.onload = function() {
             throw Error('Unknonwn message command ' + e.data.cmd);
         }
     };
+    setInterval(function() {
+      // Trigger resize of the embedded window to match the canvas size.
+      // May somewhen be obsoleted by:
+      //   https://gerrit.libreoffice.org/c/core/+/174040
+      window.dispatchEvent(new Event('resize'));
+    }, 1000);  // milliseconds
   });
 };
 // Hint: The global objects "canvas" and "Module" must exist before the next line.

@@ -39,14 +39,14 @@ function demo() {
     doc = desktop.loadComponentFromURL('file:///tmp/ping_monitor.ods', '_default', 0, []);
     ctrl = doc.getCurrentController();
 
-    topwin = css.awt.Toolkit.create(context).getActiveTopWindow();
-    topwin.FullScreen = true;
-    topwin.setMenuBar(null);
-
-    // Workaround to hide scrollbars and sheet tabs:
-    // Move them behind the lower and right edges of the canvas.
-    topwin.setPosSize(0, 0, 1300+12, 600+40, 15);
-    //topwin.setPosSize(-40, 0, 1300+52, 600+40, 15);  // with "Formula Bar" and "RowColumnHeaders"
+    //topwin = css.awt.Toolkit.create(context).getActiveTopWindow();
+    //topwin.setMenuBar(null);
+    //topwin.FullScreen = true;
+    //
+    //// Workaround to hide scrollbars and sheet tabs:
+    //// Move them behind the lower and right edges of the canvas.
+    //topwin.setPosSize(0, 0, 1300+12, 600+40, 15);
+    ////topwin.setPosSize(-40, 0, 1300+52, 600+40, 15);  // with "Formula Bar" and "RowColumnHeaders"
 
     // Turn off UI elements:
     dispatch('.uno:Sidebar');
@@ -58,8 +58,8 @@ function demo() {
     cellRange = activeSheet.getCellRangeByPosition(0, 1, 0, max_values+1);
     dataAry = cellRange.getDataArray();  // 2 dimensional array
     zetajs.mainPort.onmessage = function (e) {
-        topwin.setPosSize(0, 0, 1300+12, 600+40, 15);
-        //topwin.setPosSize(-40, 0, 1300+52, 600+40, 15);  // with "Formula Bar" and "RowColumnHeaders"
+        //topwin.setPosSize(0, 0, 1300+12, 600+40, 15);
+        ////topwin.setPosSize(-40, 0, 1300+52, 600+40, 15);  // with "Formula Bar" and "RowColumnHeaders"
         switch (e.data.cmd) {
         case 'ping_result':
             const newUrl = e.data.url;
@@ -75,6 +75,15 @@ function demo() {
         default:
             throw Error('Unknonwn message command ' + e.data.cmd);
         }
+        // workaround topwin==null bug since about:
+        //   https://git.libreoffice.org/core/+/c3d32f43aa956a745828d7357ac73825e0ed4cd7%5E%21
+        topwin = css.awt.Toolkit.create(context).getActiveTopWindow();
+        topwin.setMenuBar(null);
+        topwin.FullScreen = true;
+        // Workaround to hide scrollbars and sheet tabs:
+        // Move them behind the lower and right edges of the canvas.
+        topwin.setPosSize(0, 0, 1300+12, 600+40, 15);
+        //topwin.setPosSize(-40, 0, 1300+52, 600+40, 15);  // with "Formula Bar" and "RowColumnHeaders"
     }
 
     zetajs.mainPort.postMessage({cmd: 'ready'});

@@ -43,12 +43,13 @@ function demo() {
     formatText = xComponent.getNumberFormats().
         queryKey('@', charLocale, false);
 
-    const topwin = css.awt.Toolkit.create(context).getActiveTopWindow();
-    topwin.FullScreen = true;
-    topwin.setMenuBar(null);
+    //const topwin = css.awt.Toolkit.create(context).getActiveTopWindow();
+    //topwin.setMenuBar(null);
+    //topwin.FullScreen = true;
 
     // Turn off sidebar:
     dispatch('.uno:Sidebar');
+    dispatch('.uno:InputLineVisible');  // FormulaBar at the top
     // Turn off statusbar:
     ctrl.getFrame().LayoutManager.hideElement("private:resource/statusbar/statusbar");
 
@@ -89,6 +90,11 @@ function demo() {
         default:
             throw Error('Unknonwn message command ' + e.data.cmd);
         }
+        // workaround topwin==null bug since about:
+        //   https://git.libreoffice.org/core/+/c3d32f43aa956a745828d7357ac73825e0ed4cd7%5E%21
+        const topwin = css.awt.Toolkit.create(context).getActiveTopWindow();
+        topwin.setMenuBar(null);
+        topwin.FullScreen = true;
     }
 
     zetajs.mainPort.postMessage({cmd: 'ready'});
