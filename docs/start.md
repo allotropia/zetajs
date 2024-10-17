@@ -108,7 +108,7 @@ That `zetajs` object has certain properties:
 
 - `zetajs.mainPort` is used for [communication between threads](#communication-between-threads).
 
-See [The zetajs UNO Mapping](uno.html) for further documentation of the mapping between zetajs and UNO.
+See [The zetajs UNO Mapping](uno.html) for further documentation of the mapping between zetajs and UNO.  Whenver a value of UNO type `ANY` is returned from zetajs, the unwrapped repsresentation will be used.  However, for situations that need to preserve the exact contained type of a returned value of UNO type `ANY`, each zetajs representation of a UNO object has a `$precise` property.  For UNO calls made through such a `$precise` property, whenever a value of UNO type `ANY` is returned, the wrapped repsresentation will be used.
 
 ## Communication Between Threads
 

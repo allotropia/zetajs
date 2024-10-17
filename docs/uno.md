@@ -32,11 +32,23 @@ The mapping between [UNO types](http://www.openoffice.org/udk/common/man/typesys
 
 - UNO `ANY` maps to the combined set of wrapped and unwrapped representations:
 
-    - Any value of UNO type `ANY` can map to a wrapped representation, which is an opaque JavaScript object that has a `type` property (containing a zetajs representation of a value of UNO type `TYPE`) and a `val` property (containing a zetajs representation of a value of the given UNO type).
+    - Any value of UNO type `ANY` can map to and from a wrapped representation, which is an opaque JavaScript object that has a `type` property (containing a zetajs representation of a value of UNO type `TYPE`) and a `val` property (containing a zetajs representation of a value of the given UNO type).
 
-    - A value of UNO type `ANY` where the contained UNO value is of any of the UNO types `VOID`, `BOOLEAN`, `LONG`, `HYPER`, `STRING`, `TYPE`, a UNO enum type, a UNO struct type, or a UNO exception type, can also be mapped to an unwrapped representation, which directly maps to the JavaScript representation of the contained UNO value.
+    - A value of UNO type `ANY` where the contained UNO value is of any of the UNO types `VOID`, `BOOLEAN`, `LONG`, `HYPER`, `STRING`, `TYPE`, a UNO enum type, a UNO struct type, or a UNO exception type, can also map to and from an unwrapped representation, which directly maps to the JavaScript representation of the contained UNO value.
 
-    See the documentation of `zetajs.Any` and `zetajs.fromAny` at [Starting Points: Using zetajs](start.html#using-zetajs).
+    - A value of UNO type `ANY` where the contained UNO value is of any of the UNO types `BYTE`, `SHORT`, `UNSIGNED SHORT`, `UNSIGNED LONG`, `UNSIGNED HYPER`, `FLOAT`, `DOUBLE`, `CHAR`, a UNO sequence type, or a UNO interface type, can also map to an unwrapped representation, which directly maps to the JavaScript representation of the contained UNO value.  In the opposite direction:
+
+        - JavaScript Number values with integer values in the interval 2<sup>63</sup> (inclusive) to 2<sup>64</sup> (exclusive) map to UNO `ANY` values with contained values of UNO type `UNSIGNED LONG`.
+
+        - JavaScript Number values not covered by the preceding cases for `LONG` and `UNSIGNED LONG` target types map to UNO `ANY` values with contained values of UNO type `DOUBLE`.
+
+        - JavaScript BigInt values that are larger than 2<sup>63</sup>&nbsp;&minus;&nbsp;1 map to UNO `ANY` values with contained values of UNO type `UNSIGNED HYPER`.
+
+        - JavaScript Array values map to UNO `ANY` values with contained values of UNO type &ldquo;sequence of `ANY`&rdquo;.
+
+        - JavaScript Null values and JavaScript objects representing UNO objects map to UNO `ANY` values with contained values of UNO interface type `com.sun.star.uno.XInterface`.
+
+    Also see the documentation of `zetajs.Any`, `zetajs.getAnyType`, and `zetajs.fromAny` at [Starting Points: Using zetajs](start.html#using-zetajs).
 
 - UNO sequence types map to JavaScript Arrays with corresponding element value constraints, up to the JavaScript length limit of 2<sup>32</sup>&minus;1 elements.
 

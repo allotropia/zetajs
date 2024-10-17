@@ -22,12 +22,11 @@ function demo() {
 
     // Turn off toolbars:
     const config = css.configuration.ReadWriteAccess.create(context, 'en-US')
-    const uielems = zetajs.fromAny(
-        config.getByHierarchicalName(
-            '/org.openoffice.Office.UI.CalcWindowState/UIElements/States'));
+    const uielems = config.getByHierarchicalName(
+        '/org.openoffice.Office.UI.CalcWindowState/UIElements/States');
     for (const i of uielems.getElementNames()) {
-        const uielem = zetajs.fromAny(uielems.getByName(i));
-        if (zetajs.fromAny(uielem.getByName('Visible'))) {
+        const uielem = uielems.getByName(i);
+        if (uielem.getByName('Visible')) {
             uielem.setPropertyValue('Visible', false);
         }
     }
@@ -61,7 +60,7 @@ function demo() {
     doc = desktop.loadComponentFromURL('file:///tmp/calc_ping_example.ods', '_default', 0, []);
     ctrl = doc.getCurrentController();
     xComponent = ctrl.getModel();
-    charLocale = zetajs.fromAny(xComponent.getPropertyValue('CharLocale'));
+    charLocale = xComponent.getPropertyValue('CharLocale');
     formatNumber = xComponent.getNumberFormats().
         queryKey('0', charLocale, false);
     formatText = xComponent.getNumberFormats().
@@ -130,7 +129,7 @@ function button(id, url) {
     const listener = zetajs.unoObject([css.frame.XStatusListener], {
         disposing: function(source) {},
         statusChanged: function(state) {
-            zetajs.mainPort.postMessage({cmd: 'state', id, state: zetajs.fromAny(state.State)});
+            zetajs.mainPort.postMessage({cmd: 'state', id, state: state.State});
         }
     });
     queryDispatch(urlObj).addStatusListener(listener, urlObj);

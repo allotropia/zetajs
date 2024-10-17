@@ -57,10 +57,7 @@ With zetajs:
 const css = zetajs.uno.com.sun.star;
 const desktop = css.frame.Desktop.create(zetajs.getUnoComponentContext());
 let xModel = desktop.getCurrentFrame().getController().getModel();
-if (xModel === null
-    || !zetajs.fromAny(
-        xModel.queryInterface(zetajs.type.interface(css.text.XTextDocument))))
-{
+if (!xModel?.queryInterface(zetajs.type.interface(css.text.XTextDocument))) {
     xModel = desktop.loadComponentFromURL(
         'file:///android/default-document/example.odt', '_default', 0, []);
 }
@@ -90,8 +87,7 @@ With zetajs:
 ```javascript
 const xText = xModel.getText();
 const xParaEnumeration = xText.createEnumeration();
-for (const next of xParaEnumeration) {
-    const xParagraph = zetajs.fromAny(next);
+for (const xParagraph of xParaEnumeration) {
     const color = Math.floor(Math.random() * 0xFFFFFF);
     xParagraph.setPropertyValue("CharColor", color);
 }
