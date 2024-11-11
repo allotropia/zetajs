@@ -26,7 +26,7 @@ const pingTarget = document.getElementById("ping_target");
 // Switch the web worker in the browsers debug tab to debug code inside uno_scripts.
 var Module = {
   canvas,
-  uno_scripts: ['./zeta.js', './office_thread.js'],
+  uno_scripts: ['zeta.js', './office_thread.js'],
   locateFile: function(path, prefix) { return (prefix || soffice_base_url) + path; },
 };
 if (soffice_base_url !== '') {

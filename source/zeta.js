@@ -1083,4 +1083,6 @@ Module.zetajs = new Promise(function (resolve, reject) {
 
 Module.uno_init.then(function() { Module.zetajs$resolve(); });
 
+export const zetajs = await Module.zetajs();
+
 /* vim:set shiftwidth=2 softtabstop=2 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
