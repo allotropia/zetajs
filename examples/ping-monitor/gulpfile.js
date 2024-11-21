@@ -42,9 +42,14 @@ function compileHTML() {
   let js_links ='<script src="assets/vendor/ping/ping.js" type="text/javascript"></script>';
 
   return gulp.src(['index.html'])
-    .pipe( inject.replace('<!-- Vendor CSS Files -->', css_links) )
-    .pipe( inject.replace('<!-- Vendor JS Files -->', js_links) )
-    .pipe( inject.replace('<!-- soffice.js Base -->', soffice_base_url) )
+    .pipe( inject.replace('<!-- GULP Vendor CSS Files -->.*<!-- -->', css_links) )
+    .pipe( inject.replace('<!-- GULP Vendor JS Files -->.*<!-- -->', js_links) )
+    .pipe( inject.replace("let soffice_base_url = '';  \/\/ GULP replaced line!",
+      `let soffice_base_url = '${soffice_base_url}';`) )
+    .pipe( inject.replace("const zetajs_path = '\.\/zeta.js';  \/\/ GULP replaced line!",
+      "const zetajs_path = './assets/vendor/zetajs/zeta.js';") )
+    .pipe( inject.replace("const assets_base_url = './';  \/\/ GULP replaced line!",
+      "const assets_base_url = './assets/';") )
     .pipe(gulp.dest(distDir))
     .pipe(browserSync.stream());
 }

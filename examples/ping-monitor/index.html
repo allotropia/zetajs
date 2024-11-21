@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <title>ZetaJS Demo: Ping Monitor</title>
-    <!-- Vendor CSS Files -->
+    <!-- GULP Vendor CSS Files --><link rel="stylesheet" href="w3.css"><!-- -->
     <style>
       .disable-mouse-input {
         cursor: not-allowed;
@@ -29,7 +29,7 @@
         background-color: #059669 !important; /* ZetaOffice brand color */
       }
     </style>
-    <!-- Vendor JS Files -->
+    <!-- GULP Vendor JS Files --><script src="ping.js" type="text/javascript"></script><!-- -->
   </head>
   <body>
     <h1>ZetaJS Demo: Ping Monitor</h1>
@@ -76,7 +76,10 @@
 
       // Set base URL to the soffice.* files.
       // Use an empty string if those files are in the same directory.
-      let soffice_base_url = '<!-- soffice.js Base -->';
+      let soffice_base_url = '';  // GULP replaced line!
+
+      const zetajs_path = './zeta.js';  // GULP replaced line!
+      const assets_base_url = './';  // GULP replaced line!
 
       const canvas = document.getElementById('qtcanvas');
       const pingTarget = document.getElementById('pingTarget');
@@ -85,7 +88,7 @@
 
       var Module = {
         canvas,
-        uno_scripts: ['./assets/vendor/zetajs/zeta.js', './office_thread.js'],
+        uno_scripts: [zetajs_path, './office_thread.js'],
         locateFile: function(path, prefix) { return (prefix || soffice_base_url) + path; },
       };
       if (soffice_base_url !== '') {
@@ -107,7 +110,7 @@
       });
 
       async function load_ping_monitor_ods() {
-        const response = await fetch("./assets/ping_monitor.ods");
+        const response = await fetch(assets_base_url + 'ping_monitor.ods');
         return response.arrayBuffer();
       }
       let ping_monitor_ods;
