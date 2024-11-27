@@ -79,6 +79,12 @@ For the sources of the WASM binaries served by cdn.zetaoffice.net see:
 * https://github.com/allotropia/qt5/tree/5.15.2%2Bwasm
 * https://github.com/allotropia/qtbase/tree/5.15.2%2Bwasm
 
+For the sources of the WASM binaries served by cdn.zetaoffice.net see:  
+https://git.libreoffice.org/core/+/refs/heads/distro/allotropia/zeta-24-2  
+https://github.com/allotropia/emscripten/commits/fixed-3.1.65/  
+https://github.com/allotropia/qt5/tree/5.15.2%2Bwasm  
+https://github.com/allotropia/qtbase/tree/5.15.2%2Bwasm
+
 ## Contributions
 
 ### Submitting issues
