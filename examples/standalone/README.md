@@ -3,6 +3,8 @@ toolbars, side panels, etc. Includes HTML buttons to for simple formatting (bold
 
 See config.sample.js for configuration options.
 
+[online demo](https://zetaoffice.net/demos/standalone/)
+
 ## Run local for development
 
 To run the example, do

@@ -2,6 +2,8 @@ An example of how to run a full ZetaOffice / LibreOffice in the web browser.
 
 See config.sample.js for configuration options.
 
+[online demo](https://zetaoffice.net/demos/web-office/)
+
 # Run local for development
 
 To run the example, do

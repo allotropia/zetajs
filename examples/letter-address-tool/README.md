@@ -3,6 +3,8 @@ without any surrounding menubars, toolbars, side panels, etc.
 
 See config.sample.js for configuration options.
 
+[online demo](https://zetaoffice.net/demos/letter-address-tool/)
+
 # Run local for development
 
 To run the example, do

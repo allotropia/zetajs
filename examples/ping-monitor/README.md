@@ -3,6 +3,8 @@ All surrounding UI elements are hidden in this demo.
 
 See config.sample.js for configuration options.
 
+[online demo](https://zetaoffice.net/demos/ping-monitor/)
+
 # Run local for development
 
 To run the example, do

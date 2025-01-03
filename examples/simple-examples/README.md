@@ -1,6 +1,13 @@
 These are small examples that showcase code snippets how to programmatically interact with
 documents.
 
+## Online demos
+
+- [find_and_replace.html](https://zetaoffice.net/demos/simple-examples/find_and_replace.html)
+- [rainbow_writer.html](https://zetaoffice.net/demos/simple-examples/rainbow_writer.html)
+- [simple.html](https://zetaoffice.net/demos/simple-examples/simple.html)
+- [simple_key_handler.html](https://zetaoffice.net/demos/simple-examples/simple_key_handler.html)
+
 ## Running the examples
 
 Put the whole Git repo into a webservers webroot. The whole Git repo is needed, because this directory has a symlink to "../../source/zeta.js".
