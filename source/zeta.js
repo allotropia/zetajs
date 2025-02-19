@@ -175,7 +175,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
           if (obj !== null) {
               const target = obj[getProxyTarget];
               const handle = target === undefined ? obj : target;
-              if (handle instanceof ClassHandle) {
+              if (handle instanceof Module.ClassHandle) {
                   if (type.toString() === 'com.sun.star.uno.XInterface') {
                       return handle;
                   }
