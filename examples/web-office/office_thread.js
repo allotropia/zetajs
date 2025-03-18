@@ -29,9 +29,9 @@ function demo() {
     case 'upload':
       loadFile(e.data.filename);
       break;
-    case 'download':
+    case 'save':
       xModel.store();
-      zetajs.mainPort.postMessage({cmd: 'download', id: e.data.id});
+      zetajs.mainPort.postMessage({cmd: 'save', id: e.data.id});
       break;
     default:
       throw Error('Unknonwn message command ' + e.data.cmd);
