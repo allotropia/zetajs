@@ -2,6 +2,7 @@
 <script setup lang=ts>
   import ControlBar from '@/components/ControlBar.vue';
   import Ping from 'ping.js';
+  import zetajs from 'zetajs';
 </script>
 
 <script lang=ts>
