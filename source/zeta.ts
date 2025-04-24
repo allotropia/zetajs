@@ -1,19 +1,32 @@
 /* -*- Mode: JS; tab-width: 2; indent-tabs-mode: nil; js-indent-level: 2; fill-column: 100 -*- */
 // SPDX-License-Identifier: MIT
 
-'use strict';
+// TODO
+//declare const Module: any;
+//declare const FinalizationRegistry: any;
+//declare const Any: any;
+//declare const TypeArgumentIndex: any;
+//declare const uno: any;
+//declare const Any: {
+//  new(...args: any[]): any;
+//};
+//declare const Any: {
+//  new(...args: any[]): any {}
+//};
+//class Any { constructor(...args: any[]) {} }
+//declare const Any: any;
 
 Module.zetajs = new Promise(function (resolve, reject) {
   Module.zetajs$resolve = function() {
     // A FinalizationRegistry for zetajs objects that own Embind objects that, in turn, should
     // be .delete()'d (so that Embind doesn't print any "Embind found a leaked C++ instance"
     // warnings for them); it is tied to Module so it doesn't itself get GC'ed early:
-    Module.uno$zetajs_deleteRegistry = new FinalizationRegistry(function(value) {
+    Module.uno$zetajs_deleteRegistry = new FinalizationRegistry(function(value: any[]) {
       value.forEach((val) => val.delete());
     });
     const getProxyTarget = Symbol('getProxyTarget');
     const keepAlive = Symbol('keepAlive');
-    function gcWrap(obj) {
+    function gcWrap(obj: any) {
       // Embind has already registered obj at some FinalizationRegistry that prints the
       // "Embind found a leaked C++ instance" warning, which we want to suppress; and if we
       // registered obj itself also at our deleting FinalizationRegistry, the Embind one might
@@ -23,7 +36,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
       Module.uno$zetajs_deleteRegistry.register(proxy, [obj]);
       return proxy
     }
-    function getEmbindSequenceCtor(componentType) {
+    function getEmbindSequenceCtor(componentType: any) {
       let typename = componentType.toString();
       let name = 'uno_Sequence';
       let n = 1;
@@ -48,7 +61,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
       val.delete();
       return tdm;
     };
-    function translateTypeDescription(td) {
+    function translateTypeDescription(td: any): any {
       switch (td.getTypeClass()) {
       case Module.uno.com.sun.star.uno.TypeClass.VOID:
         return Module.uno_Type.Void();
@@ -105,18 +118,18 @@ Module.zetajs = new Promise(function (resolve, reject) {
           'bad type description ' + td.getName() + ' type class ' + td.getTypeClass());
       }
     };
-    function translateTypeDescriptionAndDelete(td) {
+    function translateTypeDescriptionAndDelete(td: any): any {
       try {
         return translateTypeDescription(td);
       } finally {
         td.delete();
       }
     }
-    function translateToEmbind(obj, type, toDelete) {
+    function translateToEmbind(obj: any, type: any, toDelete: any[]): any {
       switch (type.getTypeClass()) {
       case Module.uno.com.sun.star.uno.TypeClass.ANY:
           {
-              const {any, owning} = translateToAny(obj, Module.uno_Type.Any());
+              const {any: any, owning} = translateToAny(obj, Module.uno_Type.Any());
               if (owning) {
                   toDelete.push(any);
               }
@@ -138,8 +151,8 @@ Module.zetajs = new Promise(function (resolve, reject) {
       case Module.uno.com.sun.star.uno.TypeClass.STRUCT:
       case Module.uno.com.sun.star.uno.TypeClass.EXCEPTION:
           {
-              const val = {};
-              function walk(td) {
+              const val: any = {};
+              function walk(td: any) {
                   const base = td.getBaseType();
                   if (base !== null) {
                       const td = Module.uno.com.sun.star.reflection.XCompoundTypeDescription
@@ -193,7 +206,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
       }
       return obj;
     };
-    function translateToAny(obj, type) {
+    function translateToAny(obj: any, type: any) {
       try {
         let any;
         let owning;
@@ -213,7 +226,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
             fromType = type;
             val = obj;
           }
-          const toDelete = [];
+          const toDelete: any[] = [];
           any = new Module.uno_Any(fromType, translateToEmbind(val, fromType, toDelete));
           owning = true;
           toDelete.forEach((val) => val.delete());
@@ -223,7 +236,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
         type.delete();
       }
     };
-    function translateFromEmbind(val, type, precise, cleanUpVal) {
+    function translateFromEmbind(val: any, type: any, precise: any, cleanUpVal: any): any {
       switch (type.getTypeClass()) {
       case Module.uno.com.sun.star.uno.TypeClass.BOOLEAN:
         return Boolean(val);
@@ -240,6 +253,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
               val.delete();
             }
           }
+          // @ts-ignore
           return precise ? new Any(ty, v) : v;
         }
       case Module.uno.com.sun.star.uno.TypeClass.SEQUENCE:
@@ -266,7 +280,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
               type: type.toString()
             }
           };
-          function walk(td) {
+          function walk(td: any) {
             const base = td.getBaseType();
             if (base !== null) {
               const td = Module.uno.com.sun.star.reflection.XCompoundTypeDescription
@@ -304,7 +318,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
         return val;
       }
     };
-    function translateFromAny(any, type, precise) {
+    function translateFromAny(any: any, type: any, precise: any) {
       if (type.getTypeClass() === Module.uno.com.sun.star.uno.TypeClass.ANY) {
         return translateFromEmbind(any, type, precise, false);
       } else {
@@ -314,16 +328,16 @@ Module.zetajs = new Promise(function (resolve, reject) {
         return val;
       }
     };
-    function translateFromAnyAndDelete(any, type, precise) {
+    function translateFromAnyAndDelete(any: any, type: any, precise: any) {
       const val = translateFromAny(any, type, precise);
       any.delete();
       return val;
     };
-    function proxy(unoObject) {
+    function proxy(unoObject: any) {
       if (unoObject === null) {
         return null;
       }
-      const prox = {};
+      const prox: any = {};
       const toDelete = [unoObject];
       Module.uno$zetajs_deleteRegistry.register(prox, toDelete);
       prox[getProxyTarget] = unoObject;
@@ -347,7 +361,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
         const invoke = Module.uno.com.sun.star.script.XInvocation2.query(inst);
         inst.delete();
         toDelete.push(invoke);
-        function invokeMethod(name, args, precise) {
+        function invokeMethod(name: any, args: any, precise: any) {
           const info = invoke.getInfoForName(name, true);
           try {
             if (args.length != info.aParamTypes.size()) {
@@ -421,7 +435,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
             info.aParamModes.delete();
           }
         };
-        function invokeGetter(name, precise) {
+        function invokeGetter(name: any, precise: any) {
           const info = invoke.getInfoForName(name, true);
           try {
             const ret = invoke.getValue(name);
@@ -432,7 +446,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
             info.aParamModes.delete();
           }
         };
-        function invokeSetter(name, value) {
+        function invokeSetter(name: any, value: any) {
           const info = invoke.getInfoForName(name, true);
           const deleteArgs = [];
           const {any, owning} = translateToAny(value, info.aType);
@@ -451,9 +465,10 @@ Module.zetajs = new Promise(function (resolve, reject) {
             return invokeMethod('queryInterface', arguments, false); };
         prox.$precise.queryInterface = function() {
             return invokeMethod('queryInterface', arguments, true); };
-        const seen = {'com.sun.star.uno.XInterface': true};
-        function walk(td) {
+        const seen: any = {'com.sun.star.uno.XInterface': true};
+        function walk(td: any) {
           const iname = td.getName();
+          // @ts-ignore
           if (!Object.hasOwn(seen, iname)) {
             seen[iname] = true;
             if (td.getTypeClass() !== Module.uno.com.sun.star.uno.TypeClass.INTERFACE) {
@@ -529,32 +544,32 @@ Module.zetajs = new Promise(function (resolve, reject) {
       }
       return prox;
     };
-    function singleton(name) {
-      return function(context) {
+    function singleton(name: any) {
+      return function(context: any) {
         const any = context.getValueByName('/singletons/' + name);
         if (getAnyType(any).getTypeClass() !==
             Module.uno.com.sun.star.uno.TypeClass.INTERFACE
           || any === null)
         {
           throwUnoException(
-            new uno.com.sun.star.uno.DeploymentException(
+            new (uno as any).com.sun.star.uno.DeploymentException(
               {Message: 'cannot get singeleton ' + name}));
         }
         return any.val;
       };
     };
-    function service(name, td) {
-      const obj = {};
+    function service(name: any, td: any) {
+      const obj: any = {};
       const ctors = td.getConstructors();
       for (let i = 0; i !== ctors.size(); ++i) {
         const ctor = ctors.get(i);
         if (ctor.isDefaultConstructor()) {
-          obj.create = function(context) {
+          obj.create = function(context: any) {
             const ifc = context.getServiceManager().createInstanceWithContext(
               name, context);
             if (ifc === null) {
               throwUnoException(
-                new uno.com.sun.star.uno.DeploymentException(
+                new (uno as any).com.sun.star.uno.DeploymentException(
                   {Message:
                    'cannot instantiate single-interface service ' + name}));
             }
@@ -577,6 +592,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 const ty = param.getType();
                 if (ty.getTypeClass() !== Module.uno.com.sun.star.uno.TypeClass.ANY)
                 {
+                  // @ts-ignore
                   arg = new Any(
                     gcWrap(translateTypeDescriptionAndDelete(param.getType())),
                     arg);
@@ -591,7 +607,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                   .createInstanceWithArgumentsAndContext(name, args, context);
             if (ifc === null) {
               throwUnoException(
-                new uno.com.sun.star.uno.DeploymentException(
+                new (uno as any).com.sun.star.uno.DeploymentException(
                   {Message:
                    'cannot instantiate single-interface service ' + name}));
             }
@@ -602,7 +618,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
       ctors.delete();
       return obj;
     };
-    function defaultValue(type) {
+    function defaultValue(type: any) {
       switch (type.getTypeClass()) {
       case Module.uno.com.sun.star.uno.TypeClass.BOOLEAN:
         return false;
@@ -656,6 +672,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
           computeMembers(td, members);
           td.delete();
           const val = {};
+          // @ts-ignore
           populate(val, [], members);
           return val;
         }
@@ -665,8 +682,11 @@ Module.zetajs = new Promise(function (resolve, reject) {
         throw new Error('bad member type ' + type);
       }
     }
-    function TypeArgumentIndex(index) { this.index = index; };
-    function computeMembers(type, obj) {
+    function TypeArgumentIndex(index: any) {
+      // @ts-ignore
+      this.index = index;
+    };
+    function computeMembers(type: any, obj: any) {
       const td = Module.uno.com.sun.star.reflection.XCompoundTypeDescription.query(type);
       const base = td.getBaseType();
       if (base !== null) {
@@ -692,6 +712,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
             }
           }
           params.delete();
+          // @ts-ignore
           val = new TypeArgumentIndex(index);
         } else {
           const type = translateTypeDescription(memtype);
@@ -704,7 +725,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
       types.delete();
       names.delete();
     };
-    function populate(obj, types, members, values) {
+    function populate(obj: any, types: any[], members: any, values: any) {
       for (let i in members) {
         let val;
         if (values !== undefined && i in values) {
@@ -712,13 +733,14 @@ Module.zetajs = new Promise(function (resolve, reject) {
         } else {
           val = members[i];
           if (val instanceof TypeArgumentIndex) {
+            // @ts-ignore
             val = defaultValue(types[val.index]);
           }
         }
         obj[i] = val;
       }
     };
-    function instantiationName(templateName, types) {
+    function instantiationName(templateName: string, types: any) {
       let name = templateName + '<';
       for (let i = 0; i !== types.length; ++i) {
         if (i !== 0) {
@@ -728,11 +750,11 @@ Module.zetajs = new Promise(function (resolve, reject) {
       }
       return name + '>';
     }
-    function unoidlProxy(path, embindObject) {
+    function unoidlProxy(path: string, embindObject: any) {
       return new Proxy({}, {
         get(target, prop) {
-          if (!Object.hasOwn(target, prop)) {
-            const name = path + '.' + prop;
+          if (!(Object as any).hasOwn(target, prop)) {
+            const name = path + '.' + (prop as any);
             const tdm = getTypeDescriptionManager();
             const tdAny = tdm.getByHierarchicalName(name);
             tdm.delete();
@@ -742,7 +764,9 @@ Module.zetajs = new Promise(function (resolve, reject) {
             ifc.delete();
             switch (td.getTypeClass()) {
             case Module.uno.com.sun.star.uno.TypeClass.ENUM:
+              // @ts-ignore
               target[prop] = embindObject[prop];
+              // @ts-ignore
               target[prop][Module.unoTagSymbol] = {kind: 'enum', type: name};
               break;
             case Module.uno.com.sun.star.uno.TypeClass.STRUCT:
@@ -756,12 +780,16 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 const paramCount = params.size();
                 params.delete();
                 if (paramCount === 0) {
+                  // @ts-ignore
                   target[prop] = function(values) {
+                    // @ts-ignore
                     populate(this, [], members, values);
+                    // @ts-ignore
                     this[Module.unoTagSymbol] = {
                       kind: 'struct-instance', type: name};
                   };
                 } else {
+                  // @ts-ignore
                   target[prop] = function(types, values) {
                     if (types.length !== paramCount) {
                       throw new Error(
@@ -769,61 +797,63 @@ Module.zetajs = new Promise(function (resolve, reject) {
                           ', expected ' + paramCount + ' vs. actual ' +
                           types.length);
                     }
-                    populate(this, types, members, values);
-                    this[Module.unoTagSymbol] = {
+                    populate((this as any), types, members, values);
+                    (this as any)[Module.unoTagSymbol] = {
                       kind: 'struct-instance',
                       type: instantiationName(name, types)};
                   };
                 }
-                target[prop][Module.unoTagSymbol] = {kind: 'struct', type: name};
+                (target as any)[prop][Module.unoTagSymbol] = {kind: 'struct', type: name};
                 break;
               }
             case Module.uno.com.sun.star.uno.TypeClass.EXCEPTION:
               {
                 const members = {};
                 computeMembers(td, members);
-                target[prop] = function(values) {
+                (target as any)[prop] = function(values: any) {
                   populate(this, [], members, values);
                   this[Module.unoTagSymbol] = {
                     kind: 'exception-instance', type: name};
                 };
-                target[prop][Module.unoTagSymbol] = {kind: 'exception', type: name};
+                (target as any)[prop][Module.unoTagSymbol] = {kind: 'exception', type: name};
                 break;
               }
             case Module.uno.com.sun.star.uno.TypeClass.INTERFACE:
-              target[prop] = {[Module.unoTagSymbol]: {kind: 'interface', type: name}};
+              (target as any)[prop] = {[Module.unoTagSymbol]: {kind: 'interface', type: name}};
               break;
             case Module.uno.com.sun.star.uno.TypeClass.MODULE:
-              target[prop] = unoidlProxy(name, embindObject[prop]);
+              (target as any)[prop] = unoidlProxy(name, embindObject[prop]);
               break;
             case Module.uno.com.sun.star.uno.TypeClass.SINGLETON:
-              target[prop] = singleton(name);
+              (target as any)[prop] = singleton(name);
               break;
             case Module.uno.com.sun.star.uno.TypeClass.SERVICE:
               {
                 const std = Module.uno.com.sun.star.reflection
                   .XServiceTypeDescription2.query(td);
                 if (std.isSingleInterfaceBased()) {
-                  target[prop] = service(name, std);
+                  (target as any)[prop] = service(name, std);
                 }
                 std.delete();
                 break;
               }
             case Module.uno.com.sun.star.uno.TypeClass.CONSTANTS:
-              target[prop] = embindObject[prop];
+              (target as any)[prop] = embindObject[prop];
               break;
             }
             td.delete();
           }
-          return target[prop];
+          return (target as any)[prop];
         }
       });
     };
-    function Any(type, val) {
+    function Any(type: any, val: any) {
+      // @ts-ignore
       this.type = type;
+      // @ts-ignore
       this.val = val;
     };
-    function getAnyType(val) {
+    function getAnyType(val: any) {
       switch (typeof val) {
       case 'undefined':
         return gcWrap(Module.uno_Type.Void());
@@ -843,11 +873,11 @@ Module.zetajs = new Promise(function (resolve, reject) {
       case 'string':
         return gcWrap(Module.uno_Type.String());
       case 'object':
-        if (val === null || Object.hasOwn(val, getProxyTarget)) {
+        if (val === null || (Object as any).hasOwn(val, getProxyTarget)) {
           return gcWrap(Module.uno_Type.Interface('com.sun.star.uno.XInterface'));
         } else if (val instanceof Module.uno_Type) {
           return gcWrap(Module.uno_Type.Type());
-        } else if (val instanceof Any) {
+        } else if (val instanceof (Any as any)) {
           return val.type;
         } else if (val instanceof Array) {
           const t = Module.uno_Type.Any();
@@ -873,16 +903,17 @@ Module.zetajs = new Promise(function (resolve, reject) {
         return undefined;
       }
     };
-    function fromAny(val) { return val instanceof Any ? val.val : val; };
-    function throwUnoException(exception) {
+    function fromAny(val: any) { return val instanceof Any ? (val as any).val : val; };
+    function throwUnoException(exception: any) {
       const type = gcWrap(Module.uno_Type.Exception(exception[Module.unoTagSymbol].type));
-      const toDelete = [];
+      const toDelete: any[] = [];
       const val = translateToEmbind(exception, type, toDelete);
       Module.throwUnoException(type, val, toDelete);
     };
-    function catchUnoException(exception) {
+    function catchUnoException(exception: any) {
         const td = Module.uno_Type.Any();
         try {
+          // @ts-ignore
           return translateFromAnyAndDelete(Module.catchUnoException(exception), td);
         } finally {
           td.delete();
@@ -890,14 +921,14 @@ Module.zetajs = new Promise(function (resolve, reject) {
     };
     const uno = new Proxy({}, {
       get(target, prop) {
-        if (!Object.hasOwn(target, prop)) {
+        if (!(Object as any).hasOwn(target, prop)) {
           const tdm = getTypeDescriptionManager();
           const td = tdm.getByHierarchicalName(prop);
           tdm.delete();
           td.delete();
-          target[prop] = unoidlProxy(prop, Module.uno[prop]);
+          (target as any)[prop] = unoidlProxy((prop as string), Module.uno[prop]);
         }
-        return target[prop];
+        return (target as any)[prop];
       }
     });
     const zetajs = {
@@ -917,33 +948,33 @@ Module.zetajs = new Promise(function (resolve, reject) {
         string: gcWrap(Module.uno_Type.String()),
         type: gcWrap(Module.uno_Type.Type()),
         any: gcWrap(Module.uno_Type.Any()),
-        sequence(type) { return gcWrap(Module.uno_Type.Sequence(type)); },
-        enum(name) {
-          if (typeof name === 'function' && Object.hasOwn(name, Module.unoTagSymbol)
+        sequence(type: any) { return gcWrap(Module.uno_Type.Sequence(type)); },
+        enum(name: any) {
+          if (typeof name === 'function' && (Object as any).hasOwn(name, Module.unoTagSymbol)
             && name[Module.unoTagSymbol].kind === 'enum')
           {
             name = name[Module.unoTagSymbol].type;
           }
           return gcWrap(Module.uno_Type.Enum(name));
         },
-        struct(name) {
-          if (typeof name === 'function' && Object.hasOwn(name, Module.unoTagSymbol)
+        struct(name: any) {
+          if (typeof name === 'function' && (Object as any).hasOwn(name, Module.unoTagSymbol)
             && name[Module.unoTagSymbol].kind === 'struct')
           {
             name = name[Module.unoTagSymbol].type;
           }
           return gcWrap(Module.uno_Type.Struct(name));
         },
-        exception(name) {
-          if (typeof name === 'function' && Object.hasOwn(name, Module.unoTagSymbol)
+        exception(name: any) {
+          if (typeof name === 'function' && (Object as any).hasOwn(name, Module.unoTagSymbol)
             && name[Module.unoTagSymbol].kind === 'exception')
           {
             name = name[Module.unoTagSymbol].type;
           }
           return gcWrap(Module.uno_Type.Exception(name));
         },
-        interface(name) {
-          if (typeof name === 'object' && Object.hasOwn(name, Module.unoTagSymbol)
+        interface(name: any) {
+          if (typeof name === 'object' && (Object as any).hasOwn(name, Module.unoTagSymbol)
             && name[Module.unoTagSymbol].kind === 'interface')
           {
             name = name[Module.unoTagSymbol].type;
@@ -954,9 +985,9 @@ Module.zetajs = new Promise(function (resolve, reject) {
       Any,
       getAnyType,
       fromAny,
-      sameUnoObject: function(obj1, obj2) {
+      sameUnoObject: function(obj1: any, obj2: any) {
         const type = Module.uno_Type.Interface('com.sun.star.uno.XInterface');
-        const toDelete = [];
+        const toDelete: any[] = [];
         try {
           return Module.sameUnoObject(
             translateToEmbind(obj1, type, toDelete),
@@ -972,15 +1003,15 @@ Module.zetajs = new Promise(function (resolve, reject) {
       throwUnoException,
       catchUnoException,
       uno,
-      unoObject: function(interfaces, obj) {
-        const wrapper = {};
-        const toDelete = [];
+      unoObject: function(interfaces: any[], obj: any) {
+        const wrapper: any = {};
+        const toDelete: any[] = [];
         Module.uno$zetajs_deleteRegistry.register(wrapper, toDelete);
-        const seen = {
+        const seen: any = {
           'com.sun.star.lang.XTypeProvider': true, 'com.sun.star.uno.XInterface': true};
-        function walk(td) {
+        function walk(td: any) {
           const iname = td.getName();
-          if (!Object.hasOwn(seen, iname)) {
+          if (!(Object as any).hasOwn(seen, iname)) {
             seen[iname] = true;
             if (td.getTypeClass() !== Module.uno.com.sun.star.uno.TypeClass.INTERFACE) {
               throw new Error('not a UNO interface type: ' + iname);
@@ -1025,7 +1056,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 const retType = translateTypeDescriptionAndDelete(
                   mtd.getReturnType());
                 toDelete.push(retType);
-                const params = [];
+                const params: any[] = [];
                 const descrs = mtd.getParameters();
                 mtd.delete();
                 for (let j = 0; j !== descrs.size(); ++j) {
@@ -1039,7 +1070,7 @@ Module.zetajs = new Promise(function (resolve, reject) {
                 wrapper[mname] = function() {
                   const args = [];
                   for (let i = 0; i !== params.length; ++i) {
-                    let arg;
+                    let arg: any;
                     if (params[i].dirOut) {
                       arg = {};
                       if (params[i].dirIn) {
@@ -1068,10 +1099,10 @@ Module.zetajs = new Promise(function (resolve, reject) {
           }
         };
         const tdm = getTypeDescriptionManager();
-        const interfaceNames = [];
+        const interfaceNames: any[] = [];
         interfaces.forEach((i) => {
           let name = i;
-          if (typeof name === 'object' && Object.hasOwn(name, Module.unoTagSymbol)
+          if (typeof name === 'object' && (Object as any).hasOwn(name, Module.unoTagSymbol)
               && name[Module.unoTagSymbol].kind === 'interface')
           {
               name = name[Module.unoTagSymbol].type;

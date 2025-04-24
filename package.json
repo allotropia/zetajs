@@ -4,6 +4,7 @@
   "description": "Access ZetaOffice in the Browser from JavaScript via UNO",
   "exports": {
     "./zeta.js": "./source/zeta.js",
+    "./zeta.ts": "./source/zeta.ts",
     "./zetaHelper.js": "./source/zetaHelper.js",
     "./zetaHelper.ts": "./source/zetaHelper.ts"
   },
