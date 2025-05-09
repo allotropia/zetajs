@@ -72,8 +72,8 @@
       <div class="row">
         <div class="col">
           <div class="controls">
-            <input class="btn btn-light" type="file" id="btnUploadFile" disabled/>
-            <button class="btn btn-light" id="btnDownloadFile" onclick="btnDownloadFileFunc()" disabled>Download File</button>
+            <button class="btn btn-light" id="btnUploadFile" onclick="btnUploadFileFunc()" disabled>Select File</button>
+            <button class="btn btn-light" id="btnSaveFile" onclick="btnSaveFileFunc()" disabled>Save File</button>
           </div>
         </div>
       </div>
@@ -113,7 +113,7 @@
       const waitingForInput = document.getElementById('waitingForInput');
       const loadingInfo = document.getElementById('loadingInfo');
       const btnUploadFile = document.getElementById('btnUploadFile');
-      const btnDownloadFile = document.getElementById('btnDownloadFile');
+      const btnSaveFile = document.getElementById('btnSaveFile');
 
 
       let started = false;
@@ -132,19 +132,59 @@
       let thrPort;     // zetajs thread communication
       let lastDevicePixelRatio = window.devicePixelRatio;
 
+      let fileHandle;
+      let useFSAPI = 'showOpenFilePicker' in window;
 
-      btnUploadFile.onchange = function() {
-        btnUploadFile.disabled = "disabled";  // can't handle multiple files yet
-        btnUploadFile.files[0].arrayBuffer().then(aryBuf => {
+      async function btnUploadFileFunc() {
+        btnUploadFile.disabled = "disabled";
+        if (useFSAPI) {
+          // File System Access API
+          [fileHandle] = await window.showOpenFilePicker();
+          const fileData = await fileHandle.getFile();
+          filename = fileData.name;
+          let arrayBuffer = await fileData.arrayBuffer();
           try { FS.mkdir('/tmp/office/'); } catch {}
-          filename = btnUploadFile.files[0].name;
-          FS.writeFile('/tmp/office/' + filename, new Uint8Array(aryBuf));
-          thrPort.postMessage({cmd: 'upload', filename});
-        });
-      };
+          await FS.writeFile('/tmp/office/' + filename, new Uint8Array(arrayBuffer));
+          await thrPort.postMessage({ cmd: 'upload', filename });
+        } else {
+          // Fallback for unsupported browsers
+          const fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.onchange = async (event) => {
+            const file = event.target.files[0];
+            filename = file.name;
+            const arrayBuffer = await file.arrayBuffer();
+            try { FS.mkdir('/tmp/office/'); } catch {}
+            await FS.writeFile('/tmp/office/' + filename, new Uint8Array(arrayBuffer));
+            await thrPort.postMessage({ cmd: 'upload', filename });
+          };
+          fileInput.click();
+        }
+      }
 
-      function btnDownloadFileFunc(btnObj) {
-        thrPort.postMessage({cmd: 'download'});
+      function btnSaveFileFunc() {
+        if (useFSAPI) {
+          // File System Access API
+          thrPort.postMessage({ cmd: 'save' });
+        } else {
+          // Fallback for unsupported browsers
+          const bytes = FS.readFile('/tmp/office/' + filename);
+          const blob = new Blob([bytes], {});
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = filename;
+          link.style = 'display:none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+        }
+      }
+
+      async function saveFile(blob) {
+         const writable = await fileHandle.createWritable();
+         await writable.write(blob);
+         await writable.close();
       }
 
       window.onresize = function() {
@@ -176,7 +216,7 @@
             switch (e.data.cmd) {
             case 'ready':
               loadingInfo.style.display = 'none';
-              btnDownloadFile.disabled = false;
+              btnSaveFile.disabled = false;
               if (!started) {
                 btnUploadFile.disabled = false;
               } else {
@@ -190,17 +230,10 @@
               //   https://gerrit.libreoffice.org/c/core/+/174040
               window.dispatchEvent(new Event('resize'));
               break;
-            case 'download':
+            case 'save':
               const bytes = FS.readFile('/tmp/office/' + filename);
               const blob = new Blob([bytes], {});
-              const link = document.createElement('a');
-              link.href = URL.createObjectURL(blob);
-              link.download = filename;
-              link.style = 'display:none';
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(link.href);
+              saveFile(blob);
               break;
             default:
               throw Error('Unknown message command: ' + e.data.cmd);
