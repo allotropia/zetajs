@@ -8,6 +8,9 @@ import { ZetaHelperMain } from './assets/vendor/zetajs/zetaHelper.js';
 let tbDataJs;    // toolbar dataset passed from vue.js for plain JS
 let letterForeground = true;
 let data = [];
+let useFSAPI = 'showOpenFilePicker' in window;
+let fileHandle;
+let isFileUploaded = false;
 
 const loadingInfo = document.getElementById('loadingInfo');
 const canvas = document.getElementById('qtcanvas');
@@ -17,7 +20,6 @@ const addrNameCell = document.getElementById('addrNameCell');
 const canvasCell = document.getElementById('canvasCell');
 const btnLetter = document.getElementById('btnLetter');
 const btnTable = document.getElementById('btnTable');
-const lblUpload = document.getElementById('lblUpload');
 const btnUpload = document.getElementById('btnUpload');
 const btnReload = document.getElementById('btnReload');
 const btnInsert = document.getElementById('btnInsert');
@@ -67,8 +69,6 @@ window.btnSwitchTab = (tab) => {  // window....: make it accessible to vue.js
     btnTable.classList.remove('active');
     controlbar.style.display = null;
     btnUpload.accept = '.odt';
-    lblUpload.classList.remove('btn-primary');
-    lblUpload.classList.add('btn-light');
     btnInsert.disabled = false;
     addrNameCell.style.display = null;
     addrName.style.visibility = null;
@@ -86,8 +86,6 @@ window.btnSwitchTab = (tab) => {  // window....: make it accessible to vue.js
     btnTable.classList.add('active');
     controlbar.style.display = 'none';
     btnUpload.accept = '.ods';
-    lblUpload.classList.add('btn-primary');
-    lblUpload.classList.remove('btn-light');
     btnInsert.disabled = true;
     addrNameCell.style.display = 'none';
     addrName.style.visibility = 'hidden';
@@ -107,19 +105,35 @@ window.btnDownloadFunc = (btnId) => {  // window....: make it accessible to vue.
   zHM.thrPort.postMessage({cmd: 'download', id: btnId});
 }
 
-window.btnUploadFunc = () => {  // window....: make it accessible to vue.js
-  for (const elem of disabledElementsAry) elem.disabled = true;
-  lblUpload.classList.add('disabled');
+window.btnUploadFunc = async () => {  // window....: make it accessible to vue.js
   const filename = letterForeground ? 'letter.odt' : 'table.ods';
-  btnUpload.files[0].arrayBuffer().then(aryBuf => {
+  if (useFSAPI) {
+    [fileHandle] = await window.showOpenFilePicker({
+      types: [
+        {
+          accept: {
+            'application/vnd.oasis.opendocument.text': ['.odt']
+          }
+        }
+      ],
+      excludeAcceptAllOption: true,
+      multiple: false
+    });
+    const fileData = await fileHandle.getFile();
+    let aryBuf = await fileData.arrayBuffer();
     FS.writeFile('/tmp/' + filename, new Uint8Array(aryBuf));
-    btnReloadFunc();
-  });
+  } else {
+    btnUpload.files[0].arrayBuffer().then(aryBuf => {
+      FS.writeFile('/tmp/' + filename, new Uint8Array(aryBuf));
+    });
+  }
+  for (const elem of disabledElementsAry) elem.disabled = true;
+  btnReloadFunc();
+  isFileUploaded = true;
 }
 
 window.btnReloadFunc = () => {  // window....: make it accessible to vue.js
   for (const elem of disabledElementsAry) elem.disabled = true;
-  lblUpload.classList.add('disabled');
   loadingInfo.style.display = null;
   canvas.style.visibility = 'hidden';
   zHM.thrPort.postMessage({cmd: 'reload', id: letterForeground});
@@ -152,7 +166,6 @@ zHM.start(() => {
         canvas.style.visibility = null;
         tbDataJs.font_name_list = e.data.fontsList;
         for (const elem of disabledElementsAry) elem.disabled = false;
-        lblUpload.classList.remove('disabled');
         btnInsert.disabled = !letterForeground;
       }, 1000);  // milliseconds
       break;
@@ -175,19 +188,29 @@ zHM.start(() => {
       const bytes = zHM.FS.readFile('/tmp/output');
       const format = e.data.id === 'btnOdt' ? 'odt' : 'pdf';
       const blob = new Blob([bytes], {type: 'application/' + format});
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'letter.' + format;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
+      if (useFSAPI && isFileUploaded) {
+        saveFile(blob);
+      } else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'letter.' + format;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      }
       break;
     default:
       throw Error('Unknown message command: ' + e.data.cmd);
     }
   };
+
+  async function saveFile(blob) {
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+  }
 
   getDataFile('./letter.odt').then((aryBuf) => {
     zHM.FS.writeFile('/tmp/letter.odt', new Uint8Array(aryBuf));
