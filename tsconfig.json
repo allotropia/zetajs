@@ -9,8 +9,5 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
-  },
-  "DISABLED_TODO.compilerOptions": {
-    "lib": ["es2022"],
   }
 }
