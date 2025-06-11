@@ -46,9 +46,9 @@ function loadFile(filename) {
   zetajs.mainPort.postMessage({cmd: 'ui_ready'});
 }
 
-Module.zetajs.then(function(pZetajs) {
+import('./assets/vendor/zetajs/zeta.js').then(function(pZetajs) {
   // initializing zetajs environment:
-  zetajs = pZetajs;
+  zetajs = pZetajs.zetajs;
   css = zetajs.uno.com.sun.star;
   demo();  // launching demo
 });

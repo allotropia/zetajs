@@ -48,7 +48,8 @@ export class ZetaHelperMain {
 
     if (threadJs) threadJs = (new URL(threadJs, location.href)).toString();
 
-    const zetajsScript = modUrlDir + 'zeta.js';
+    const zetajsScriptSrc = modUrlDir + 'zeta.js';
+    const zetajsScript = 'data:text/javascript;charset=UTF-8,import("' + zetajsScriptSrc + '");';
     const threadWrapScript = 'data:text/javascript;charset=UTF-8,' +
       'import("' + import.meta.url + '").then(m => {m.zetaHelperWrapThread();});';
     const wasmPkg = options.wasmPkg || 'free';

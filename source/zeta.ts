@@ -16,8 +16,9 @@
 //class Any { constructor(...args: any[]) {} }
 //declare const Any: any;
 
-Module.zetajs = new Promise(function (resolve, reject) {
-  Module.zetajs$resolve = function() {
+(globalThis as any).Module.zetajs = new Promise(function (resolve, reject) {
+  (globalThis as any).Module.zetajs$resolve = function() {
+    const Module = (globalThis as any).Module;
     // A FinalizationRegistry for zetajs objects that own Embind objects that, in turn, should
     // be .delete()'d (so that Embind doesn't print any "Embind found a leaked C++ instance"
     // warnings for them); it is tied to Module so it doesn't itself get GC'ed early:
@@ -1127,9 +1128,11 @@ Module.zetajs = new Promise(function (resolve, reject) {
     };
     resolve(zetajs);
   };
-  Module.zetajs$reject = reject;
+  (globalThis as any).Module.zetajs$reject = reject;
 });
 
-Module.uno_init.then(function() { Module.zetajs$resolve(); });
+(globalThis as any).Module.uno_init.then(function() { (globalThis as any).Module.zetajs$resolve(); });
+
+export const zetajs = await Module.zetajs;
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

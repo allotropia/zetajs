@@ -82,9 +82,9 @@ function ColorXKeyHandler(xModel) {
 };
 
 
-Module.zetajs.then(function(pZetajs) {
+import('./zeta.js').then(function(pZetajs) {
   // initializing zetajs environment:
-  zetajs = pZetajs;
+  zetajs = pZetajs.zetajs;
   css = zetajs.uno.com.sun.star;
   demo();  // launching demo
 });
