@@ -59,7 +59,10 @@ export class ZetaHelperMain {
     soffice_base_url = (new URL(soffice_base_url, location.href)).toString();
     const Module: any = {
       canvas,
-      uno_scripts: [zetajsScript, threadWrapScript],
+      // TODO: import only threadWrapScript.
+      //       So import zeta.js on demand in the threads.
+      //uno_scripts: [zetajsScript, threadWrapScript],
+      uno_scripts: [threadWrapScript],
       locateFile: (path: string, prefix: string) => { return (prefix || soffice_base_url) + path; },
       modUrlDir,
     };
@@ -153,7 +156,10 @@ export class ZetaHelperMain {
  */
 export function zetaHelperWrapThread() {
   const zJsModule = (globalThis as any).Module;
-  zJsModule.zetajs.then((zetajs: any) => {
+  import('./zeta.js').then((foobar: any) => {
+    const zetajs = foobar.zetajs;
+  //zJsModule.zetajs.then((zetajs: any) => {
+  //foobar.then((zetajs: any) => {
     const port: MessagePort = zetajs.mainPort;
     port.onmessage = (e) => {
       switch (e.data.cmd) {
@@ -183,6 +189,8 @@ export function zetaHelperWrapThread() {
     port.postMessage({
       cmd: 'ZetaHelper::thr_started'
     });
+  //});
+
   });
 }
 
