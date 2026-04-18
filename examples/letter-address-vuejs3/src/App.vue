@@ -62,10 +62,8 @@ export default {
               </div>
               <div id="controlCell" class="col-lg-3">
                 <h4>Document</h4>
-                <label class="btn btn-light btn-sm disabled" id="lblUpload">
-                  Upload new file
-                  <input accept=".odt" class="file-input" type="file" id="btnUpload" onchange="btnUploadFunc()" disabled>
-                </label>
+                <button class="btn btn-light btn-sm ms-2" id="btnUpload" onclick="btnUploadFunc()" disabled>
+                  Upload new file</button>
                 <button class="btn btn-light btn-sm ms-2" id="btnReload" onclick="btnReloadFunc()" disabled>
                   Reload file</button>
                 <div id="addrNameCell">
